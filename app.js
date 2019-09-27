@@ -1,19 +1,21 @@
 require('dotenv').config();
-const app = require('express')();
+const http = require('http');
+let i = 0;
 
+http.createServer((req, res) => {
+  if (req.method === 'GET' && req.url !== '/favicon.ico'){
+    i++;
+    const date = new Date();
+    const runtime = date.getTime();
 
-app.get('/', (req, res)=>{
-  const date = new Date();
-  const interval = setInterval(()=>{
-    console.log(date);
-  }, process.env.INTER_VAL);
-  setTimeout(()=>{
-    clearInterval(interval);
-    res.send(date);
-  }, process.env.TIME_OUT);
-});
+    res.writeHead(200, {'Content-Type': 'text/html'});
 
-
-const server = app.listen(3000, ()=>{
-  console.log('start server');
-});
+    const interval = setInterval(()=>{
+     if(new Date().getTime() - runtime >= +process.env.TIME_OUT){
+       clearInterval(interval);
+       res.end(`${date}`);
+     }
+      console.log(`User-${i}: ${date}`);
+    }, process.env.INTER_VAL);
+  }
+}).listen(3000);
